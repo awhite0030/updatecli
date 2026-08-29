@@ -15,7 +15,9 @@ import (
 
 // InitSCM search and clone only once SCM configurations found.
 func (e *Engine) InitSCM() (err error) {
-	hashes := []uint64{}
+	if e.scmCloneHashes == nil {
+		e.scmCloneHashes = []uint64{}
+	}
 
 	wg := sync.WaitGroup{}
 	channel := make(chan int, 20)
@@ -28,14 +30,14 @@ func (e *Engine) InitSCM() (err error) {
 			s := pipeline.SCMs[j]
 
 			if s.Handler != nil {
-				err = Clone(&s.Handler, channel, &hashes, &wg)
+				err = Clone(&s.Handler, channel, &e.scmCloneHashes, &wg)
 				if err != nil {
 					return err
 				}
 			}
 		}
 	}
-	logrus.Infof("\nSCM repository retrieved: %d", len(hashes))
+	logrus.Infof("\nSCM repository retrieved: %d", len(e.scmCloneHashes))
 
 	return err
 }
@@ -49,7 +51,12 @@ func Clone(
 ) error {
 	scmhandler := *s
 
-	hash, err := hashstructure.Hash(scmhandler.GetDirectory(), nil)
+	cacheID, err := scmhandler.CacheID()
+	if err != nil {
+		return err
+	}
+
+	hash, err := hashstructure.Hash(cacheID, nil)
 	if err != nil {
 		return err
 	}

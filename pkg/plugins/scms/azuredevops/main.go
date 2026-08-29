@@ -379,6 +379,11 @@ func (a *AzureDevOps) GetDirectory() (directory string) {
 	return a.Spec.Directory
 }
 
+// CacheID returns the cache identifier for the SCM
+func (a *AzureDevOps) CacheID() (string, error) {
+	return a.GetDirectory(), nil
+}
+
 // GetURL returns an Azure DevOps git URL.
 func (a *AzureDevOps) GetURL() string {
 	return a.repositoryURL()

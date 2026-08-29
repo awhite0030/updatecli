@@ -87,6 +87,11 @@ func (g *Git) GetDirectory() (directory string) {
 	return g.spec.Directory
 }
 
+// CacheID returns the cache identifier for the SCM
+func (g *Git) CacheID() (string, error) {
+	return g.GetDirectory(), nil
+}
+
 // Clean removes the current git repository from local storage.
 func (g *Git) Clean() error {
 	err := os.RemoveAll(g.spec.Directory) // clean up

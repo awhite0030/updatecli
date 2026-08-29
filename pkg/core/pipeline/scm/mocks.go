@@ -12,6 +12,10 @@ func (m *MockScm) GetDirectory() (directory string) {
 	return m.WorkingDir
 }
 
+func (m *MockScm) CacheID() (string, error) {
+	return m.GetDirectory(), nil
+}
+
 func (m *MockScm) GetChangedFiles(workingDir string) ([]string, error) {
 	m.WorkingDir = workingDir
 	return m.ChangedFiles, m.Err

@@ -59,6 +59,7 @@ type ScmHandler interface {
 	GetBranches() (sourceBranch, workingBranch, targetBranch string)
 	GetURL() string
 	Summary() string
+	CacheID() (string, error)
 }
 
 func New(config *Config, pipelineID string) (Scm, error) {

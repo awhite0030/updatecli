@@ -81,6 +81,11 @@ func (b *Bitbucket) GetDirectory() (directory string) {
 	return b.Spec.Directory
 }
 
+// CacheID returns the cache identifier for the SCM
+func (b *Bitbucket) CacheID() (string, error) {
+	return b.GetDirectory(), nil
+}
+
 // Clean deletes github working directory.
 func (b *Bitbucket) Clean() error {
 	err := os.RemoveAll(b.Spec.Directory)

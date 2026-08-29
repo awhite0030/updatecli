@@ -23,7 +23,7 @@ const (
 
 var (
 	// defaultSchemaDir defines the schema root directory
-	defaultSchemaDir string = "../../../../schema"
+	defaultSchemaDir string = "../../../schema"
 	// Set base schema ID
 	defaultBaseSchemaID string = "https://www.updatecli.io/schema"
 	// Set base package name

@@ -64,6 +64,11 @@ func (s *Stash) GetDirectory() (directory string) {
 	return s.Spec.Directory
 }
 
+// CacheID returns the cache identifier for the SCM
+func (s *Stash) CacheID() (string, error) {
+	return s.GetDirectory(), nil
+}
+
 // Clean deletes github working directory.
 func (s *Stash) Clean() error {
 	err := os.RemoveAll(s.Spec.Directory)

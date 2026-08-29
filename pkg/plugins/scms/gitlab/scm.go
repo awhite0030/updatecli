@@ -68,6 +68,11 @@ func (g *Gitlab) GetDirectory() (directory string) {
 	return g.Spec.Directory
 }
 
+// CacheID returns the cache identifier for the SCM
+func (g *Gitlab) CacheID() (string, error) {
+	return g.GetDirectory(), nil
+}
+
 // Clean deletes github working directory.
 func (g *Gitlab) Clean() error {
 	err := os.RemoveAll(g.Spec.Directory)
