@@ -20,6 +20,7 @@ func TestFile_Condition(t *testing.T) {
 		mockedError      error
 		wantedResult     bool
 		wantedErr        bool
+		wantedMsg        string
 	}{
 		{
 			name: "Passing case with 'Line' specified",
@@ -40,6 +41,7 @@ func TestFile_Condition(t *testing.T) {
 				"foo.txt": "Hello World\r\nAnother line\r\ncurrent_version=1.2.3",
 			},
 			wantedResult: true,
+			wantedMsg:    `condition on file "foo.txt" passed`,
 		},
 		{
 			name: "Passing case with 'Content' specified and no source specified",
@@ -290,13 +292,16 @@ func TestFile_Condition(t *testing.T) {
 				files:            tt.files,
 			}
 
-			gotResult, _, gotErr := f.Condition(context.Background(), tt.inputSourceValue, nil)
+			gotResult, gotMsg, gotErr := f.Condition(context.Background(), tt.inputSourceValue, nil)
 			if tt.wantedErr {
 				assert.Error(t, gotErr)
 				return
 			}
 			require.NoError(t, gotErr)
 			assert.Equal(t, tt.wantedResult, gotResult)
+			if tt.wantedMsg != "" {
+				assert.Equal(t, tt.wantedMsg, gotMsg)
+			}
 		})
 	}
 }
