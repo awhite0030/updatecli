@@ -25,8 +25,13 @@ func (f *File) Condition(_ context.Context, source string, scm scm.ScmHandler) (
 		return false, "", fmt.Errorf("init files: %w", err)
 	}
 
-	files := f.spec.Files
-	files = append(files, f.spec.File)
+	var files []string
+	if len(f.spec.File) > 0 {
+		files = append(files, f.spec.File)
+	}
+	if len(f.spec.Files) > 0 {
+		files = append(files, f.spec.Files...)
+	}
 
 	passing, err := f.condition(source)
 	if err != nil {
@@ -35,10 +40,10 @@ func (f *File) Condition(_ context.Context, source string, scm scm.ScmHandler) (
 
 	switch passing {
 	case true:
-		return true, fmt.Sprintf("condition on file %q passed", files), nil
+		return true, fmt.Sprintf("condition on file %q passed", strings.Join(files, ", ")), nil
 
 	case false:
-		return false, fmt.Sprintf("condition on file %q did not pass", files), nil
+		return false, fmt.Sprintf("condition on file %q did not pass", strings.Join(files, ", ")), nil
 	}
 
 	return false, "", fmt.Errorf("unexpected error happened on file. Please report to an issue")
