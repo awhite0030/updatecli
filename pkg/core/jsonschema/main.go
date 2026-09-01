@@ -200,6 +200,12 @@ func GetPackageComments(rootPackagePath string) (map[string]string, error) {
 				delete(r.CommentMap, key)
 			}
 		}
+
+		// Also populate configAlias map entries so that descriptions are picked up for embedded target.Config etc.
+		if strings.Contains(newkey, ".Config") {
+			aliasKey := strings.Replace(newkey, ".Config", ".configAlias", 1)
+			r.CommentMap[aliasKey] = value
+		}
 	}
 
 	if len(r.CommentMap) == 0 {
