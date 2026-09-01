@@ -26,6 +26,51 @@ func Test_Target(t *testing.T) {
 		dryRun           bool
 	}{
 		{
+			name: "Yamlpath passing case with anchors and aliases, ensure !!merge tag is removed (issue #1332)",
+			spec: Spec{
+				Files: []string{
+					"test.yaml",
+				},
+				Key:    "$.x-base.image",
+				Value:  "hugomods/hugo:ci-0.129.0",
+				Engine: "yamlpath",
+			},
+			files: map[string]file{
+				"test.yaml": {
+					filePath:         "test.yaml",
+					originalFilePath: "test.yaml",
+				},
+			},
+			inputSourceValue: "hugomods/hugo:ci-0.129.0",
+			mockedContents: map[string]string{
+				"test.yaml": `x-base: &base
+  image: hugomods/hugo:ci-0.128.0
+  volumes:
+    - .:/src
+services:
+  status:
+    <<: *base
+    ports:
+      - 1313:1313
+    image: hugomods/hugo:ci-0.129.0
+`,
+			},
+			wantedContents: map[string]string{
+				"test.yaml": `x-base: &base
+  image: hugomods/hugo:ci-0.129.0
+  volumes:
+    - .:/src
+services:
+  status:
+    <<: *base
+    ports:
+      - 1313:1313
+    image: hugomods/hugo:ci-0.129.0
+`,
+			},
+			wantedResult: true,
+		},
+		{
 			name: "Yamlpath passing case with multiple documents in a file, both input source and specified value (specified value should be used)",
 			spec: Spec{
 				Files: []string{
