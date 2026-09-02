@@ -15,6 +15,18 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
+func clearMergeTags(n *yaml.Node) {
+	if n == nil {
+		return
+	}
+	if n.Tag == "!!merge" {
+		n.Tag = ""
+	}
+	for _, child := range n.Content {
+		clearMergeTags(child)
+	}
+}
+
 func (y *Yaml) goYamlPathTarget(valueToWrite string, resultTarget *result.Target, dryRun bool) (notChanged int, ignoredFiles int, err error) {
 	var buf bytes.Buffer
 	e := yaml.NewEncoder(&buf)
@@ -157,6 +169,7 @@ func (y *Yaml) goYamlPathTarget(valueToWrite string, resultTarget *result.Target
 		// Re-encode all documents back into buffer
 		buf = bytes.Buffer{}
 		for _, doc := range docs {
+			clearMergeTags(doc)
 			if err := e.Encode(doc); err != nil {
 				return 0, ignoredFiles, fmt.Errorf("unable to marshal the yaml file: %w", err)
 			}
