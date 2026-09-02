@@ -1,0 +1,15 @@
+fix(yaml): remove explicit !!merge tags when encoding with yamlpath engine
+
+Fix #1332
+
+Root cause: When parsing yaml files containing aliases and anchors and using the yamlpath engine, the go-yaml package adds implicit `!!merge` tags to the decoded nodes. When these nodes are modified and re-encoded, those internal tags are explicitly serialized, causing invalid or unwanted yaml changes.
+Fix: Created and applied a recursive `clearMergeTags` function to strip out the `!!merge` tags from the yaml nodes before they are re-encoded back to a string when using yamlpath engine.
+Validation:
+Tested by compiling the code using `go build ./...` and checking that it correctly processes and formats yaml files without emitting !!merge tags.
+Also verified changes by creating `/schema` directory and running `make test-short`.
+
+Test:
+- Ran `go build ./...`
+- Ran `make test-short`
+
+Fixes https://github.com/updatecli/updatecli/issues/1332
