@@ -375,6 +375,72 @@ func (p *Pipeline) Run(ctx context.Context) error {
 		} else if attentionCounter > 0 {
 			p.Report.Result = result.ATTENTION
 		}
+	} else if len(p.Conditions) > 0 {
+		successCounter := 0
+		skippedCounter := 0
+		attentionCounter := 0
+		failureCounter := 0
+
+		for id := range p.Conditions {
+			switch p.Conditions[id].Result.Result {
+			case result.SUCCESS:
+				successCounter++
+			case result.FAILURE:
+				failureCounter++
+			case result.SKIPPED:
+				skippedCounter++
+			case result.ATTENTION:
+				attentionCounter++
+			}
+		}
+
+		totalItems := len(p.Conditions)
+		if failureCounter > 0 {
+			p.Report.Result = result.SKIPPED
+		} else if totalItems == skippedCounter {
+			p.Report.Result = result.SKIPPED
+		} else if totalItems == successCounter+skippedCounter {
+			p.Report.Result = result.SUCCESS
+		} else if attentionCounter > 0 {
+			p.Report.Result = result.ATTENTION
+		} else {
+			p.Report.Result = result.SUCCESS
+		}
+	} else if len(p.Sources) > 0 {
+		successCounter := 0
+		skippedCounter := 0
+		attentionCounter := 0
+		failureCounter := 0
+
+		for id := range p.Sources {
+			switch p.Sources[id].Result.Result {
+			case result.SUCCESS:
+				successCounter++
+			case result.FAILURE:
+				failureCounter++
+			case result.SKIPPED:
+				skippedCounter++
+			case result.ATTENTION:
+				attentionCounter++
+			}
+		}
+
+		totalItems := len(p.Sources)
+		if failureCounter > 0 {
+			p.Report.Result = result.FAILURE
+			span.SetAttributes(attribute.String("updatecli.pipeline.result", result.FAILURE))
+			span.SetStatus(codes.Error, "source reported failure")
+			return nil
+		} else if totalItems == skippedCounter {
+			p.Report.Result = result.SKIPPED
+		} else if totalItems == successCounter+skippedCounter {
+			p.Report.Result = result.SUCCESS
+		} else if attentionCounter > 0 {
+			p.Report.Result = result.ATTENTION
+		} else {
+			p.Report.Result = result.SUCCESS
+		}
+
 	}
 
 	span.SetAttributes(attribute.String("updatecli.pipeline.result", p.Report.Result))
