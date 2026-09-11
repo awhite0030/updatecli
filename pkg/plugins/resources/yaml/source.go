@@ -108,6 +108,9 @@ func (y *Yaml) Source(_ context.Context, workingDir string, resultSource *result
 
 			node, err := urlPath.FilterNode(doc.Body)
 			if err != nil {
+				if y.spec.DocumentIndex == nil {
+					return fmt.Errorf("searching in yaml document index %d: %w", index, err)
+				}
 				return fmt.Errorf("searching in yaml document index %d: %w", *y.spec.DocumentIndex, err)
 			}
 
