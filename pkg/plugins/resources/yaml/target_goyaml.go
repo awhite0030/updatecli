@@ -76,6 +76,10 @@ func (y Yaml) goYamlTarget(valueToWrite string, resultTarget *result.Target, dry
 					}
 				}
 
+				if _, isDirective := doc.Body.(*ast.DirectiveNode); isDirective {
+					continue
+				}
+
 				// goccy reports a missing key as a nil node rather than an error,
 				// but reports an intermediate null value ("key:") as an invalid
 				// query. Both mean the key is absent, so when we are allowed to
