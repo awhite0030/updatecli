@@ -14,6 +14,7 @@ import (
 	"github.com/updatecli/updatecli/pkg/core/result"
 	"github.com/vmware-labs/yaml-jsonpath/pkg/yamlpath"
 
+	"github.com/goccy/go-yaml/ast"
 	"go.yaml.in/yaml/v3"
 )
 
@@ -99,6 +100,10 @@ func (y *Yaml) Source(_ context.Context, workingDir string, resultSource *result
 				if index != *y.spec.DocumentIndex {
 					continue
 				}
+			}
+
+			if _, isDirective := doc.Body.(*ast.DirectiveNode); isDirective {
+				continue
 			}
 
 			node, err := urlPath.FilterNode(doc.Body)

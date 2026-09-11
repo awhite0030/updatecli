@@ -25,6 +25,38 @@ func Test_Target(t *testing.T) {
 		wantedError      bool
 		dryRun           bool
 	}{
+			{
+				name: "Passing Case with yaml directive",
+				spec: Spec{
+					File:  "test.yaml",
+					Key:   "$.github.owner",
+					Value: "obiwankenobi",
+				},
+				files: map[string]file{
+					"test.yaml": {
+						originalFilePath: "test.yaml",
+						filePath:         "test.yaml",
+					},
+				},
+				inputSourceValue: "luke",
+				mockedContents: map[string]string{
+					"test.yaml": `%YAML 1.2
+---
+github:
+  owner: darkvador
+  repository: empire
+`,
+				},
+				wantedContents: map[string]string{
+					"test.yaml": `%YAML 1.2
+---
+github:
+  owner: obiwankenobi
+  repository: empire
+`,
+				},
+				wantedResult: true,
+			},
 		{
 			name: "Yamlpath passing case with multiple documents in a file, both input source and specified value (specified value should be used)",
 			spec: Spec{

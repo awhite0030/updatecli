@@ -22,6 +22,29 @@ func Test_Source(t *testing.T) {
 		isResultWanted bool
 		isErrorWanted  bool
 	}{
+			{
+				name: "Passing Case with yaml directive",
+				spec: Spec{
+					File: "data.yaml",
+					Key:  "$.name",
+				},
+				files: map[string]file{
+					"data.yaml": {
+						originalFilePath: "data.yaml",
+						filePath:         "data.yaml",
+					},
+				},
+				mockedContents: map[string]string{
+					"data.yaml": `%YAML 1.2
+---
+name: John
+`,
+				},
+				wantedContents: map[string]string{
+					"data.yaml": "John",
+				},
+				isResultWanted: true,
+			},
 		{
 			name: "yamlpath - Passing Case with multiple document",
 			spec: Spec{
