@@ -1,12 +1,32 @@
 package mergerequest
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	gitlabclient "github.com/updatecli/updatecli/pkg/plugins/resources/gitlab/client"
+	gitlabscm "github.com/updatecli/updatecli/pkg/plugins/scms/gitlab"
 )
 
+func newMockServer() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Path == "/api/v4/projects/olblak/updatecli/repository/branches/main" {
+			fmt.Fprintf(w, `{"name": "main"}`)
+		} else if r.URL.Path == "/api/v4/projects/olblak/updatecli/merge_requests" {
+			fmt.Fprintf(w, `[]`)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+}
+
 func TestIsRemoteBranchExist(t *testing.T) {
+	server := newMockServer()
+	defer server.Close()
 
 	testdata := []struct {
 		name           string
@@ -37,7 +57,14 @@ func TestIsRemoteBranchExist(t *testing.T) {
 
 	for _, td := range testdata {
 		t.Run(td.name, func(t *testing.T) {
-			gitlab, err := New(td.spec, nil)
+			scm := &gitlabscm.Gitlab{
+				Spec: gitlabscm.Spec{
+					Spec: gitlabclient.Spec{
+						URL: server.URL,
+					},
+				},
+			}
+			gitlab, err := New(td.spec, scm)
 			if err != nil {
 				t.Fatalf("failed to create Gitlab instance: %v", err)
 			}
@@ -51,6 +78,9 @@ func TestIsRemoteBranchExist(t *testing.T) {
 	}
 }
 func TestFindExistingMR_Table(t *testing.T) {
+	server := newMockServer()
+	defer server.Close()
+
 	testdata := []struct {
 		name string
 		spec Spec
@@ -78,7 +108,14 @@ func TestFindExistingMR_Table(t *testing.T) {
 	for _, td := range testdata {
 		tc := td
 		t.Run(tc.name, func(t *testing.T) {
-			gitlab, err := New(tc.spec, nil)
+			scm := &gitlabscm.Gitlab{
+				Spec: gitlabscm.Spec{
+					Spec: gitlabclient.Spec{
+						URL: server.URL,
+					},
+				},
+			}
+			gitlab, err := New(tc.spec, scm)
 			if err != nil {
 				t.Fatalf("failed to create Gitlab instance: %v", err)
 			}
