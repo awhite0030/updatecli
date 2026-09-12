@@ -20,6 +20,24 @@ func TestTarget(t *testing.T) {
 		wantErr          bool
 	}{
 		{
+			name: "Success - Expected change updating map value",
+			spec: Spec{
+				File: "testdata/data.hcl",
+				Path: `locals.lets_encrypt_dns_challenged_domains["trusted.ci.jenkins.io"]`,
+			},
+			sourceInput:    "NEW_DATE",
+			expectedResult: true,
+		},
+		{
+			name: "Success - No change updating map value",
+			spec: Spec{
+				File: "testdata/data.hcl",
+				Path: `locals.lets_encrypt_dns_challenged_domains["trusted.ci.jenkins.io"]`,
+			},
+			sourceInput:    "2024-04-03T20:00:00Z",
+			expectedResult: false,
+		},
+		{
 			name: "Success - No change",
 			spec: Spec{
 				File: "testdata/data.hcl",

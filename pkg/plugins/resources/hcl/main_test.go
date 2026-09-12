@@ -38,6 +38,13 @@ func TestQuery(t *testing.T) {
     attr1 = "val1"
   }
 }
+
+locals {
+  lets_encrypt_dns_challenged_domains = {
+    "trusted.ci.jenkins.io" = "2024-04-03T20:00:00Z"
+    "cert.ci.jenkins.io"    = "2024-04-03T21:00:00Z"
+  }
+}
 `,
 		},
 		{
@@ -59,6 +66,13 @@ func TestQuery(t *testing.T) {
     attr1 = "val1"
   }
 }
+
+locals {
+  lets_encrypt_dns_challenged_domains = {
+    "trusted.ci.jenkins.io" = "2024-04-03T20:00:00Z"
+    "cert.ci.jenkins.io"    = "2024-04-03T21:00:00Z"
+  }
+}
 `,
 		},
 		{
@@ -78,6 +92,13 @@ func TestQuery(t *testing.T) {
 
   nested {
     attr1 = "1.0.0"
+  }
+}
+
+locals {
+  lets_encrypt_dns_challenged_domains = {
+    "trusted.ci.jenkins.io" = "2024-04-03T20:00:00Z"
+    "cert.ci.jenkins.io"    = "2024-04-03T21:00:00Z"
   }
 }
 `,
