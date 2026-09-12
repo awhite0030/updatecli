@@ -24,6 +24,8 @@ func TestNew(t *testing.T) {
 			want: GitTag{
 				spec: Spec{
 					Path: "github.com/updatecli/updatecli",
+					User: "updatecli-bot",
+					Email: "updatecli-bot@updatecli.io",
 				},
 				versionFilter: version.Filter{
 					Kind:    "latest",
@@ -43,6 +45,8 @@ func TestNew(t *testing.T) {
 				spec: Spec{
 					Path: "github.com/updatecli/updatecli",
 					Key:  "hash",
+					User: "updatecli-bot",
+					Email: "updatecli-bot@updatecli.io",
 				},
 				versionFilter: version.Filter{
 					Kind:    "latest",
@@ -82,6 +86,8 @@ func TestValidate(t *testing.T) {
 			want: GitTag{
 				spec: Spec{
 					Path: "github.com/updatecli/updatecli",
+					User: "updatecli-bot",
+					Email: "updatecli-bot@updatecli.io",
 				},
 				versionFilter: version.Filter{
 					Kind:    "latest",

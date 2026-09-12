@@ -42,7 +42,7 @@ type GitHandler interface {
 	IsSimilarBranch(a, b, workingDir string) (bool, error)
 	IsLocalBranchSyncedWithRemote(baseBranch, workingBranch, username, password, workingDir string) (bool, error)
 	IsRemoteBranchExist(branch, username, password, workingDir string) (bool, error)
-	NewTag(tag, message, workingDir string) (bool, error)
+	NewTag(tag, message, workingDir string, tagger *object.Signature) (bool, error)
 	NewBranch(branch, workingDir string) (bool, error)
 	Pull(username, password, gitRepositoryPath, branch string, singleBranch, forceReset bool, depth *int) error
 	Push(username string, password string, workingDir string, force bool) (bool, error)
@@ -1011,7 +1011,7 @@ func (g GoGit) TagRefs(workingDir string) (tags []DatedTag, err error) {
 
 // NewTag create a tag then return a boolean to indicate if
 // the tag was created or not.
-func (g GoGit) NewTag(tag, message, workingDir string) (bool, error) {
+func (g GoGit) NewTag(tag, message, workingDir string, tagger *object.Signature) (bool, error) {
 	r, err := git.PlainOpen(workingDir)
 	if err != nil {
 		return false, fmt.Errorf("opening %q git directory: %w", workingDir, err)
@@ -1024,6 +1024,7 @@ func (g GoGit) NewTag(tag, message, workingDir string) (bool, error) {
 
 	_, err = r.CreateTag(tag, h.Hash(), &git.CreateTagOptions{
 		Message: message,
+		Tagger:  tagger,
 	})
 	if err != nil {
 		return false, fmt.Errorf("creating tag %q: %w", tag, err)
