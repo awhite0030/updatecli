@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/sirupsen/logrus"
 	"github.com/updatecli/updatecli/pkg/core/pipeline/scm"
 	"github.com/updatecli/updatecli/pkg/core/result"
@@ -173,7 +175,12 @@ func (gt *GitTag) target(tagName string, dryRun bool, resultTarget *result.Targe
 		return nil
 	}
 
-	_, err = gt.nativeGitHandler.NewTag(tagName, gt.spec.Message, gt.directory)
+	tagger := &object.Signature{
+		Name:  gt.spec.User,
+		Email: gt.spec.Email,
+		When:  time.Now(),
+	}
+	_, err = gt.nativeGitHandler.NewTag(tagName, gt.spec.Message, gt.directory, tagger)
 	if err != nil {
 		return err
 	}

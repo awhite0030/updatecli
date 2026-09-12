@@ -91,6 +91,20 @@ type Spec struct {
 	// 	  * condition
 	// 	  * target
 	Password string `yaml:",omitempty"`
+	//	"user" specifies the user when creating a git tag
+	//
+	//	compatible:
+	//	  * target
+	//
+	// default: updatecli-bot
+	User string `yaml:",omitempty"`
+	//	"email" specifies the email when creating a git tag
+	//
+	//	compatible:
+	//	  * target
+	//
+	// default: updatecli-bot@updatecli.io
+	Email string `yaml:",omitempty"`
 	// "sourcebranch" defines the branch name used as a source to create the new Git branch.
 	//
 	// compatible:
@@ -163,6 +177,14 @@ func New(spec interface{}) (*GitTag, error) {
 	lsRemote := false
 	if newSpec.LsRemote != nil {
 		lsRemote = *newSpec.LsRemote
+	}
+
+	if newSpec.User == "" {
+		newSpec.User = gitgeneric.DefaultGitCommitUserName
+	}
+
+	if newSpec.Email == "" {
+		newSpec.Email = gitgeneric.DefaultGitCommitEmailAddress
 	}
 
 	newResource := &GitTag{
