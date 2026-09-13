@@ -35,7 +35,7 @@ func replaceToken(node ast.Node, line, col int, oldVal, newVal string, style yam
 				n.Token.Value = newVal
 			}
 			if comment != "" {
-				setNodeComment(n, comment)
+				_ = setNodeComment(n, comment)
 			}
 			return true
 		}
@@ -45,7 +45,7 @@ func replaceToken(node ast.Node, line, col int, oldVal, newVal string, style yam
 			n.Value = 0
 			n.Token.Value = newVal
 			if comment != "" {
-				setNodeComment(n, comment)
+				_ = setNodeComment(n, comment)
 			}
 			return true
 		}
@@ -55,7 +55,7 @@ func replaceToken(node ast.Node, line, col int, oldVal, newVal string, style yam
 			n.Value = 0
 			n.Token.Value = newVal
 			if comment != "" {
-				setNodeComment(n, comment)
+				_ = setNodeComment(n, comment)
 			}
 			return true
 		}
@@ -65,7 +65,7 @@ func replaceToken(node ast.Node, line, col int, oldVal, newVal string, style yam
 			n.Value = false
 			n.Token.Value = newVal
 			if comment != "" {
-				setNodeComment(n, comment)
+				_ = setNodeComment(n, comment)
 			}
 			return true
 		}
