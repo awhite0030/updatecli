@@ -46,16 +46,14 @@ func (x *XML) Source(_ context.Context, workingDir string, resultSource *result.
 		return fmt.Errorf("loading document: %w", err)
 	}
 
-	elem := doc.FindElement(x.spec.Path)
+	queryResult, found := queryElement(doc, x.spec.Path)
 
-	if elem == nil {
+	if !found {
 		return fmt.Errorf("cannot find value for path %q from file %q",
 			x.spec.Path,
 			resourceFile,
 		)
 	}
-
-	queryResult := elem.Text()
 
 	resultSource.Result = result.SUCCESS
 	resultSource.Information = queryResult

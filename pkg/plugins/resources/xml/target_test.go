@@ -88,6 +88,24 @@ func TestTarget(t *testing.T) {
 			expectedResult:   false,
 			expectedErrorMsg: errors.New("URL scheme is not supported for XML target: \"https://raw.githubusercontent.com/updatecli/updatecli/main/pkg/plugins/resources/xml/testdata/data_2.xml\""),
 		},
+		{
+			name: "Test 8 - change attribute",
+			spec: Spec{
+				File:  "testdata/data_3.xml",
+				Path:  "/name/firstname/@tag",
+				Value: "new_tag",
+			},
+			expectedResult: true,
+		},
+		{
+			name: "Test 9 - no change attribute",
+			spec: Spec{
+				File:  "testdata/data_3.xml",
+				Path:  "/name/firstname/@tag",
+				Value: "old_tag",
+			},
+			expectedResult: false,
+		},
 	}
 
 	for _, tt := range testData {
