@@ -52,6 +52,14 @@ func TestSource(t *testing.T) {
 			},
 			expectedResult: "Belgian Waffles",
 		},
+		{
+			name: "scenario 4 - attribute",
+			spec: Spec{
+				File: "testdata/data_2.xml",
+				Path: "//name/firstname/@tag",
+			},
+			expectedResult: "test",
+		},
 	}
 
 	for _, tt := range testData {

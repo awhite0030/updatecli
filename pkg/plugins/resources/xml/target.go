@@ -50,15 +50,15 @@ func (x *XML) Target(_ context.Context, source string, scm scm.ScmHandler, dryRu
 		return err
 	}
 
-	elem := doc.FindElement(x.spec.Path)
-	if elem == nil {
+	queryResult, found := queryElement(doc, x.spec.Path)
+	if !found {
 		return fmt.Errorf("nothing found at path %q from file %q", x.spec.Path, resourceFile)
 	}
 
-	resultTarget.Information = elem.Text()
+	resultTarget.Information = queryResult
 	resultTarget.NewInformation = value
 
-	if elem.Text() == value {
+	if queryResult == value {
 		resultTarget.Result = result.SUCCESS
 		resultTarget.Description = fmt.Sprintf("path %q already set to %q in file %q",
 			x.spec.Path,
@@ -71,12 +71,14 @@ func (x *XML) Target(_ context.Context, source string, scm scm.ScmHandler, dryRu
 
 	resultTarget.Description = fmt.Sprintf("path %q updated from %q to %q in file %q",
 		x.spec.Path,
-		elem.Text(),
+		queryResult,
 		value,
 		resourceFile)
 
 	if !dryRun {
-		elem.SetText(value)
+		if err := setElement(doc, x.spec.Path, value); err != nil {
+			return err
+		}
 
 		if err := doc.WriteToFile(resourceFile); err != nil {
 			return err

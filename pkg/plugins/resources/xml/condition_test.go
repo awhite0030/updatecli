@@ -78,6 +78,24 @@ func TestCondition(t *testing.T) {
 			},
 			expectedResult: false,
 		},
+		{
+			name: "Match attribute",
+			spec: Spec{
+				File:  "testdata/data_2.xml",
+				Path:  "/name/firstname/@tag",
+				Value: "test",
+			},
+			expectedResult: true,
+		},
+		{
+			name: "Mismatch attribute",
+			spec: Spec{
+				File:  "testdata/data_2.xml",
+				Path:  "/name/firstname/@tag",
+				Value: "wrongTest",
+			},
+			expectedResult: false,
+		},
 	}
 
 	for _, tt := range testData {
