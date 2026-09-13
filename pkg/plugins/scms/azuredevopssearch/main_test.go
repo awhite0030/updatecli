@@ -8,6 +8,9 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode because it hits the network")
+	}
 	t.Run("uses defaults and sanitizes values", func(t *testing.T) {
 		search, err := New(map[string]interface{}{
 			"organization": " updatecli ",
