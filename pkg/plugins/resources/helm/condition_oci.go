@@ -7,7 +7,9 @@ import (
 
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
+	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/updatecli/updatecli/pkg/core/pipeline/scm"
+	"github.com/updatecli/updatecli/pkg/plugins/utils/docker"
 )
 
 // Condition checks if a Helm chart version exists on a OCI registry
@@ -27,12 +29,19 @@ func (c *Chart) OCICondition(source string, scm scm.ScmHandler) (pass bool, mess
 		return false, "", fmt.Errorf("invalid artifact %s: %w", refName, err)
 	}
 
-	_, err = remote.Head(ref, c.options...)
+	opts := append(c.options, remote.WithAuthFromKeychain(c.keychain))
+	_, err = remote.Head(ref, opts...)
 	if err != nil {
-		if strings.Contains(err.Error(), "unexpected status code 404") {
-			return false, fmt.Sprintf("the OCI Helm chart %s doesn't exist", ref.Name()), nil
+		if docker.IsAuthError(err) {
+			anonOpts := append(c.options, remote.WithAuth(authn.Anonymous))
+			_, err = remote.Head(ref, anonOpts...)
 		}
-		return false, "", err
+		if err != nil {
+			if strings.Contains(err.Error(), "unexpected status code 404") {
+				return false, fmt.Sprintf("the OCI Helm chart %s doesn't exist", ref.Name()), nil
+			}
+			return false, "", err
+		}
 	}
 
 	return true, fmt.Sprintf("The OCI Helm chart %s exists and is available", ref.Name()), nil

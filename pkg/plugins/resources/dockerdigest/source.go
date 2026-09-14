@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
+	"github.com/sirupsen/logrus"
 	"github.com/updatecli/updatecli/pkg/core/result"
+	"github.com/updatecli/updatecli/pkg/plugins/utils/docker"
 )
 
 // Source retrieves Docker image tag digest from a registry
@@ -31,14 +34,23 @@ func (ds *DockerDigest) Source(_ context.Context, workingDir string, resultSourc
 		return fmt.Errorf("invalid image %s: %w", refName, err)
 	}
 
-	remoteDescriptor, err := remote.Get(ref, ds.options...)
+	opts := append(ds.options, remote.WithAuthFromKeychain(ds.keychain))
+	remoteDescriptor, err := remote.Get(ref, opts...)
 	if err != nil {
-		return fmt.Errorf("unable to retrieve image %s: %w", refName, err)
+		if docker.IsAuthError(err) {
+			logrus.Debugf("unable to retrieve image %s with authentication, falling back to anonymous: %s", refName, err)
+			anonOpts := append(ds.options, remote.WithAuth(authn.Anonymous))
+			remoteDescriptor, err = remote.Get(ref, anonOpts...)
+			opts = anonOpts // update opts for subsequent calls like Image()
+		}
+		if err != nil {
+			return fmt.Errorf("unable to retrieve image %s: %w", refName, err)
+		}
 	}
 
 	digest := remoteDescriptor.Digest
 	if ds.spec.Architecture != "" {
-		image, err := remote.Image(ref, ds.options...)
+		image, err := remote.Image(ref, opts...)
 		if err != nil {
 			return fmt.Errorf("unable to retrieve image %s: %w", refName, err)
 		}

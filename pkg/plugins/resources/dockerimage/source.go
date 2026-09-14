@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/sirupsen/logrus"
 	"github.com/updatecli/updatecli/pkg/core/result"
+	"github.com/updatecli/updatecli/pkg/plugins/utils/docker"
 )
 
 func (di *DockerImage) Source(_ context.Context, workingDir string, resultSource *result.Source) error {
@@ -21,9 +23,17 @@ func (di *DockerImage) Source(_ context.Context, workingDir string, resultSource
 		repo,
 	)
 
-	tags, err := remote.List(repo, di.options...)
+	opts := append(di.options, remote.WithAuthFromKeychain(di.keychain))
+	tags, err := remote.List(repo, opts...)
 	if err != nil {
-		return fmt.Errorf("unable to list tags for repository %s: %w", repo, err)
+		if docker.IsAuthError(err) {
+			logrus.Debugf("unable to list tags for repository %s with authentication, falling back to anonymous: %s", repo, err)
+			anonOpts := append(di.options, remote.WithAuth(authn.Anonymous))
+			tags, err = remote.List(repo, anonOpts...)
+		}
+		if err != nil {
+			return fmt.Errorf("unable to list tags for repository %s: %w", repo, err)
+		}
 	}
 
 	// apply tagFilter

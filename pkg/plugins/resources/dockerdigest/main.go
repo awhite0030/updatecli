@@ -59,6 +59,7 @@ type Spec struct {
 type DockerDigest struct {
 	spec    Spec
 	options []remote.Option
+	keychain authn.Keychain
 }
 
 // New returns a reference to a newly initialized DockerDigest object from a Spec
@@ -96,7 +97,9 @@ func New(spec interface{}) (*DockerDigest, error) {
 	}
 
 	newResource.options = append(newResource.options, remote.WithPlatform(platform))
-	newResource.options = append(newResource.options, remote.WithAuthFromKeychain(authn.NewMultiKeychain(keychains...)))
+
+	newResource.keychain = authn.NewMultiKeychain(keychains...)
+
 	newResource.options = append(newResource.options, remote.WithTransport(httpclient.ProxyOnlyTransport()))
 	return newResource, nil
 
