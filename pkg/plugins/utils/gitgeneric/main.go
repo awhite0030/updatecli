@@ -672,8 +672,9 @@ func (g GoGit) Clone(username, password, URL, workingDir string, withSubmodules 
 		b.WriteString(status.String())
 
 		pullOptions := git.PullOptions{
-			Force:    true,
-			Progress: &b,
+			Force:     true,
+			Progress:  &b,
+			RemoteURL: URL,
 		}
 
 		if depth != nil {
