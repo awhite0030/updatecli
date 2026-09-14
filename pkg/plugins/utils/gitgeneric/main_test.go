@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -195,6 +197,60 @@ func TestHashesIntegration(t *testing.T) {
 		t.Errorf("Expected tag %q to be found in %q", expectedHash, hashes)
 	}
 	os.Remove(workingDir)
+}
+
+func TestClone_RepositoryAlreadyExists(t *testing.T) {
+	g := GoGit{}
+	baseDir := t.TempDir()
+
+	workingDir := filepath.Join(baseDir, "workingdir")
+	upstream1Dir := filepath.Join(baseDir, "upstream1")
+	upstream2Dir := filepath.Join(baseDir, "upstream2")
+
+	// Init upstream1 with a commit
+	upstream1Repo, err := git.PlainInit(upstream1Dir, false)
+	require.NoError(t, err)
+	w1, err := upstream1Repo.Worktree()
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(upstream1Dir, "file.txt"), []byte("v1"), 0644)
+	require.NoError(t, err)
+	_, err = w1.Add("file.txt")
+	require.NoError(t, err)
+	_, err = w1.Commit("init", &git.CommitOptions{Author: &object.Signature{Name: "test", Email: "test@example.com", When: time.Now()}})
+	require.NoError(t, err)
+
+	// Clone upstream1 into workingDir
+	withSubmodules := false
+	err = g.Clone("", "", upstream1Dir, workingDir, &withSubmodules, nil, "", false)
+	require.NoError(t, err)
+
+	// Verify workingDir has file.txt with "v1"
+	content, err := os.ReadFile(filepath.Join(workingDir, "file.txt"))
+	require.NoError(t, err)
+	assert.Equal(t, "v1", string(content))
+
+	// Init upstream2 with a commit that is ahead of upstream1 (same history, new commit)
+	upstream2Repo, err := git.PlainClone(upstream2Dir, false, &git.CloneOptions{URL: upstream1Dir})
+	require.NoError(t, err)
+	w2, err := upstream2Repo.Worktree()
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(upstream2Dir, "file.txt"), []byte("v2"), 0644)
+	require.NoError(t, err)
+	_, err = w2.Add("file.txt")
+	require.NoError(t, err)
+	_, err = w2.Commit("update", &git.CommitOptions{Author: &object.Signature{Name: "test", Email: "test@example.com", When: time.Now()}})
+	require.NoError(t, err)
+
+	// Call Clone again, but this time with upstream2Dir as the URL
+	// The repository already exists in workingDir, so it will attempt to Pull.
+	// Since we specify the new URL, it should pull from upstream2Dir successfully.
+	err = g.Clone("", "", upstream2Dir, workingDir, &withSubmodules, nil, "", false)
+	require.NoError(t, err)
+
+	// Verify workingDir now has file.txt with "v2"
+	content, err = os.ReadFile(filepath.Join(workingDir, "file.txt"))
+	require.NoError(t, err)
+	assert.Equal(t, "v2", string(content))
 }
 
 func TestGoGit_RemoteURLs(t *testing.T) {
