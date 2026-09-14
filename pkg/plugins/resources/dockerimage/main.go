@@ -12,6 +12,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/types"
 	"github.com/sirupsen/logrus"
 	"github.com/updatecli/updatecli/pkg/core/httpclient"
+	"github.com/updatecli/updatecli/pkg/plugins/utils/docker"
 	"github.com/updatecli/updatecli/pkg/plugins/utils/version"
 )
 
@@ -22,6 +23,7 @@ type DockerImage struct {
 	// versionFilter holds the "valid" version.filter, that might be different than the user-specified filter (Spec.VersionFilter)
 	versionFilter version.Filter
 	foundVersion  version.Version
+	keychain      authn.Keychain
 }
 
 // New returns a reference to a newly initialized DockerImage object from a dockerimage.Spec
@@ -69,7 +71,8 @@ func New(spec interface{}) (*DockerImage, error) {
 
 	keychains = append(keychains, authn.DefaultKeychain)
 
-	newResource.options = append(newResource.options, remote.WithAuthFromKeychain(authn.NewMultiKeychain(keychains...)))
+	newResource.keychain = authn.NewMultiKeychain(keychains...)
+
 	newResource.options = append(newResource.options, remote.WithTransport(httpclient.ProxyOnlyTransport()))
 
 	return newResource, nil
@@ -118,12 +121,20 @@ func (di *DockerImage) checkImage(ref name.Reference, arch string) (bool, error)
 		logrus.Debugf("Querying docker image %q, os: %q, arch: %q, variant %q", ref.Name(), platform.OS, platform.Architecture, platform.Variant)
 	}
 
-	descriptor, err := remote.Get(ref, remoteOptions...)
+	opts := append(remoteOptions, remote.WithAuthFromKeychain(di.keychain))
+	descriptor, err := remote.Get(ref, opts...)
 	if err != nil {
-		if strings.Contains(err.Error(), "unexpected status code 404") {
-			return false, nil
+		if docker.IsAuthError(err) {
+			logrus.Debugf("Querying docker image %q with authentication failed, falling back to anonymous: %s", ref.Name(), err)
+			anonOpts := append(remoteOptions, remote.WithAuth(authn.Anonymous))
+			descriptor, err = remote.Get(ref, anonOpts...)
 		}
-		return false, err
+		if err != nil {
+			if strings.Contains(err.Error(), "unexpected status code 404") {
+				return false, nil
+			}
+			return false, err
+		}
 	}
 
 	if arch != "" {

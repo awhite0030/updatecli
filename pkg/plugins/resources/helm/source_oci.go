@@ -5,10 +5,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/sirupsen/logrus"
 	"github.com/updatecli/updatecli/pkg/core/result"
+	"github.com/updatecli/updatecli/pkg/plugins/utils/docker"
 )
 
 // OCISource return a Helm Chart version hosted on a OCI registry
@@ -23,9 +25,17 @@ func (c *Chart) OCISource(workingDir string, resultSource *result.Source) error 
 
 	logrus.Debugf("Searching versions for Helm chart %q", repo)
 
-	versions, err := remote.List(repo, c.options...)
+	opts := append(c.options, remote.WithAuthFromKeychain(c.keychain))
+	versions, err := remote.List(repo, opts...)
 	if err != nil {
-		return fmt.Errorf("unable to list versions for OCI Helm chart %s: %w", repo, err)
+		if docker.IsAuthError(err) {
+			logrus.Debugf("unable to list versions for OCI Helm chart %s with authentication, falling back to anonymous: %s", repo, err)
+			anonOpts := append(c.options, remote.WithAuth(authn.Anonymous))
+			versions, err = remote.List(repo, anonOpts...)
+		}
+		if err != nil {
+			return fmt.Errorf("unable to list versions for OCI Helm chart %s: %w", repo, err)
+		}
 	}
 
 	c.foundVersion, err = c.versionFilter.Search(versions)

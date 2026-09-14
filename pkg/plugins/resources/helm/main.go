@@ -164,6 +164,7 @@ type Chart struct {
 	foundVersion version.Version
 	// Holds the "valid" version.filter, that might be different than the user-specified filter version filter
 	versionFilter version.Filter
+	keychain      authn.Keychain
 }
 
 // New returns a reference to a newly initialized Chart object from a Spec
@@ -202,7 +203,8 @@ func New(spec interface{}) (*Chart, error) {
 
 	keychains = append(keychains, authn.DefaultKeychain)
 
-	newResource.options = append(newResource.options, remote.WithAuthFromKeychain(authn.NewMultiKeychain(keychains...)))
+	newResource.keychain = authn.NewMultiKeychain(keychains...)
+
 	newResource.options = append(newResource.options, remote.WithTransport(httpclient.ProxyOnlyTransport()))
 
 	return newResource, nil

@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/sirupsen/logrus"
 	"github.com/updatecli/updatecli/pkg/core/pipeline/scm"
+	"github.com/updatecli/updatecli/pkg/plugins/utils/docker"
 )
 
 // Condition checks if a Docker image tag digest exists in a registry
@@ -29,12 +31,20 @@ func (ds *DockerDigest) Condition(_ context.Context, source string, scm scm.ScmH
 	if err != nil {
 		return false, "", fmt.Errorf("invalid image %s: %w", refName, err)
 	}
-	_, err = remote.Head(ref, ds.options...)
+	opts := append(ds.options, remote.WithAuthFromKeychain(ds.keychain))
+	_, err = remote.Head(ref, opts...)
 	if err != nil {
-		if strings.Contains(err.Error(), "unexpected status code 404") {
-			return false, fmt.Sprintf("the Docker image %s doesn't exist.", refName), nil
+		if docker.IsAuthError(err) {
+			logrus.Debugf("unable to reach %s with authentication, falling back to anonymous: %s", refName, err)
+			anonOpts := append(ds.options, remote.WithAuth(authn.Anonymous))
+			_, err = remote.Head(ref, anonOpts...)
 		}
-		return false, "", err
+		if err != nil {
+			if strings.Contains(err.Error(), "unexpected status code 404") {
+				return false, fmt.Sprintf("the Docker image %s doesn't exist.", refName), nil
+			}
+			return false, "", err
+		}
 	}
 
 	return true, fmt.Sprintf("the Docker image %s exists and is available.", refName), nil
