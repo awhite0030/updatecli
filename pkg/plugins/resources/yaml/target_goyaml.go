@@ -298,14 +298,19 @@ func (y Yaml) updateNode(yamlFile *ast.File, index int, doc *ast.DocumentNode, u
 		return false, nil
 	}
 
+	cloneFile, err := parser.ParseBytes([]byte(doc.String()), parser.ParseComments)
+	if err != nil {
+		return false, fmt.Errorf("cloning yaml document %d: %w", index, err)
+	}
+
 	tmpYAMLFile := ast.File{
 		Name: yamlFile.Name,
 	}
-	tmpYAMLFile.Docs = append(tmpYAMLFile.Docs, doc)
+	tmpYAMLFile.Docs = append(tmpYAMLFile.Docs, cloneFile.Docs[0])
 	if err := urlPath.ReplaceWithNode(&tmpYAMLFile, nodeToWrite); err != nil {
 		return false, fmt.Errorf("replacing yaml key %q: %w", key, err)
 	}
-	yamlFile.Docs[index].Body = tmpYAMLFile.Docs[0].Body
+	yamlFile.Docs[index] = tmpYAMLFile.Docs[0]
 
 	resultTarget.Description = fmt.Sprintf("%s\nkey %q%supdated from %q to %q, in file %q",
 		resultTarget.Description,
