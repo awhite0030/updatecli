@@ -22,6 +22,10 @@ func (m *mockGitHandlerForCondition) TagRefs(workingDir string) (refs []gitgener
 }
 
 func TestGitTag_Condition(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
+
 	tests := []struct {
 		name                   string
 		directory              string

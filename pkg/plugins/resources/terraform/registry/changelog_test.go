@@ -8,6 +8,10 @@ import (
 )
 
 func TestChangelog(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping testing in short mode")
+	}
+
 	tests := []struct {
 		name           string
 		from           string
