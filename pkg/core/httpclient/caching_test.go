@@ -265,3 +265,44 @@ func TestCachingTransport_ConcurrentAccess(t *testing.T) {
 	assert.LessOrEqual(t, serverHits, int64(goroutines))
 	assert.Equal(t, 1, ct.Len())
 }
+
+func TestCachingTransport_InvalidatesCacheOnNonGet(t *testing.T) {
+	// Arrange
+	srv, hits := newCountingServer(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("hello cache"))
+	})
+
+	ct := newCachingTransport(http.DefaultTransport)
+	client := &http.Client{Transport: ct}
+
+	// Act - populate cache
+	resp1, err := client.Get(srv.URL + "/resource")
+	require.NoError(t, err)
+	io.ReadAll(resp1.Body) //nolint:errcheck
+	resp1.Body.Close()
+
+	// Assert cache has 1 element and 1 hit
+	assert.Equal(t, int64(1), hits.Load())
+	assert.Equal(t, 1, ct.Len())
+
+	// Act - non-GET request invalidates cache
+	resp2, err := client.Post(srv.URL+"/submit", "application/json", nil)
+	require.NoError(t, err)
+	io.ReadAll(resp2.Body) //nolint:errcheck
+	resp2.Body.Close()
+
+	// Assert cache is empty
+	assert.Equal(t, int64(2), hits.Load())
+	assert.Equal(t, 0, ct.Len())
+
+	// Act - get again, should be a new hit
+	resp3, err := client.Get(srv.URL + "/resource")
+	require.NoError(t, err)
+	io.ReadAll(resp3.Body) //nolint:errcheck
+	resp3.Body.Close()
+
+	// Assert cache has 1 element and hit count increased
+	assert.Equal(t, int64(3), hits.Load())
+	assert.Equal(t, 1, ct.Len())
+}
