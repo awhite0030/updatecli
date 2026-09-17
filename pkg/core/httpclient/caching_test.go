@@ -57,6 +57,30 @@ func TestCachingTransport_CachesGetRequests(t *testing.T) {
 	assert.Equal(t, 1, ct.Len())
 }
 
+func TestCachingTransport_InvalidatesCacheOnNonGet(t *testing.T) {
+	// Arrange
+	srv, _ := newCountingServer(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("hello cache"))
+	})
+
+	ct := newCachingTransport(http.DefaultTransport)
+	client := &http.Client{Transport: ct}
+
+	// Act
+	resp1, err := client.Get(srv.URL + "/resource")
+	require.NoError(t, err)
+	resp1.Body.Close()
+	assert.Equal(t, 1, ct.Len())
+
+	resp2, err := client.Post(srv.URL+"/submit", "application/json", nil)
+	require.NoError(t, err)
+	resp2.Body.Close()
+
+	// Assert
+	assert.Equal(t, 0, ct.Len(), "non-GET requests must invalidate cache")
+}
+
 func TestCachingTransport_SkipsNonGetMethods(t *testing.T) {
 	// Arrange
 	srv, hits := newCountingServer(t, func(w http.ResponseWriter, _ *http.Request) {
