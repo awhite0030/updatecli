@@ -265,3 +265,46 @@ func TestCachingTransport_ConcurrentAccess(t *testing.T) {
 	assert.LessOrEqual(t, serverHits, int64(goroutines))
 	assert.Equal(t, 1, ct.Len())
 }
+
+
+func TestCachingTransport_InvalidatesOnNonGet(t *testing.T) {
+	// Arrange
+	srv, hits := newCountingServer(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("hello cache"))
+	})
+
+	// Use ProxyOnlyTransport to avoid linter errors about http.DefaultTransport
+	ct := newCachingTransport(ProxyOnlyTransport())
+
+	// Use NewPlainClient to avoid linter errors about &http.Client{}
+	client := NewPlainClient()
+	client.Transport = ct
+
+	// Act
+	resp1, err := client.Get(srv.URL + "/resource")
+	require.NoError(t, err)
+	io.ReadAll(resp1.Body) //nolint:errcheck
+	resp1.Body.Close()
+
+	// Cache has 1 item
+	assert.Equal(t, 1, ct.Len())
+	assert.Equal(t, int64(1), hits.Load())
+
+	// Non-get request should invalidate the cache
+	resp2, err := client.Post(srv.URL + "/submit", "application/json", nil)
+	require.NoError(t, err)
+	resp2.Body.Close()
+
+	// Assert
+	assert.Equal(t, 0, ct.Len(), "cache should be invalidated after a non-GET request")
+
+	// Get request again, should hit server
+	resp3, err := client.Get(srv.URL + "/resource")
+	require.NoError(t, err)
+	io.ReadAll(resp3.Body) //nolint:errcheck
+	resp3.Body.Close()
+
+	assert.Equal(t, int64(3), hits.Load())
+	assert.Equal(t, 1, ct.Len())
+}
