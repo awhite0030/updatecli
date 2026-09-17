@@ -91,13 +91,17 @@ func (s *Stash) CreateAction(ctx context.Context, report *reports.Action, resetD
 		&opts,
 	)
 
-	if resp.Status > 400 {
+	if resp != nil && resp.Status > 400 {
 		logrus.Debugf("RC: %d\nBody:\n%s", resp.Status, resp.Body)
 	}
 
 	if err != nil {
 		if err.Error() == scm.ErrNotFound.Error() {
 			logrus.Infof("Bitbucket pullrequest not created, skipping")
+			return nil
+		}
+		if resp != nil && resp.Status == 409 {
+			logrus.Infof("Bitbucket pullrequest already exists (409 Conflict), skipping creation")
 			return nil
 		}
 		return err
