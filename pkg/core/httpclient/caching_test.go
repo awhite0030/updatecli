@@ -57,7 +57,7 @@ func TestCachingTransport_CachesGetRequests(t *testing.T) {
 	assert.Equal(t, 1, ct.Len())
 }
 
-func TestCachingTransport_SkipsNonGetMethods(t *testing.T) {
+func TestCachingTransport_SkipsNonGetMethodsAndClearsCache(t *testing.T) {
 	// Arrange
 	srv, hits := newCountingServer(t, func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -65,6 +65,12 @@ func TestCachingTransport_SkipsNonGetMethods(t *testing.T) {
 
 	ct := newCachingTransport(http.DefaultTransport)
 	client := &http.Client{Transport: ct}
+
+	// First, populate the cache
+	respGet, err := client.Get(srv.URL + "/populate")
+	require.NoError(t, err)
+	respGet.Body.Close()
+	assert.Equal(t, 1, ct.Len())
 
 	// Act
 	for i := 0; i < 2; i++ {
@@ -74,8 +80,9 @@ func TestCachingTransport_SkipsNonGetMethods(t *testing.T) {
 	}
 
 	// Assert
-	assert.Equal(t, int64(2), hits.Load(), "non-GET requests must never be served from cache")
-	assert.Equal(t, 0, ct.Len())
+	// 1 for GET, 2 for POSTs
+	assert.Equal(t, int64(3), hits.Load(), "non-GET requests must never be served from cache")
+	assert.Equal(t, 0, ct.Len(), "cache must be cleared after a non-GET request")
 }
 
 func TestCachingTransport_SkipsNon2xxResponses(t *testing.T) {
