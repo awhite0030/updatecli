@@ -1,7 +1,6 @@
 package yaml
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -9,25 +8,94 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/vmware-labs/yaml-jsonpath/pkg/yamlpath"
+	"github.com/goccy/go-yaml/parser"
+	"github.com/goccy/go-yaml/ast"
 
 	"github.com/updatecli/updatecli/pkg/core/result"
 
 	"go.yaml.in/yaml/v3"
 )
 
+func replaceToken(node ast.Node, line, col int, oldVal, newVal string, style yaml.Style, comment string) bool {
+	if node == nil {
+		return false
+	}
+
+	switch n := node.(type) {
+	case *ast.StringNode:
+		tok := n.GetToken()
+		if tok != nil && tok.Position.Line == line && (tok.Position.Column == col || tok.Value == oldVal || strings.Trim(tok.Value, "\"") == oldVal || strings.Trim(tok.Value, "'") == oldVal) {
+			n.Value = newVal
+			switch style {
+			case yaml.DoubleQuotedStyle:
+				n.Token.Value = "\"" + newVal + "\""
+			case yaml.SingleQuotedStyle:
+				n.Token.Value = "'" + newVal + "'"
+			default:
+				n.Token.Value = newVal
+			}
+			if comment != "" {
+				setNodeComment(n, comment)
+			}
+			return true
+		}
+	case *ast.FloatNode:
+		tok := n.GetToken()
+		if tok != nil && tok.Position.Line == line && (tok.Position.Column == col || tok.Value == oldVal) {
+			n.Value = 0
+			n.Token.Value = newVal
+			if comment != "" {
+				setNodeComment(n, comment)
+			}
+			return true
+		}
+	case *ast.IntegerNode:
+		tok := n.GetToken()
+		if tok != nil && tok.Position.Line == line && (tok.Position.Column == col || tok.Value == oldVal) {
+			n.Value = 0
+			n.Token.Value = newVal
+			if comment != "" {
+				setNodeComment(n, comment)
+			}
+			return true
+		}
+	case *ast.BoolNode:
+		tok := n.GetToken()
+		if tok != nil && tok.Position.Line == line && (tok.Position.Column == col || tok.Value == oldVal) {
+			n.Value = false
+			n.Token.Value = newVal
+			if comment != "" {
+				setNodeComment(n, comment)
+			}
+			return true
+		}
+	}
+
+	switch n := node.(type) {
+	case *ast.MappingNode:
+		for _, v := range n.Values {
+			if replaceToken(v.Key, line, col, oldVal, newVal, style, comment) { return true }
+			if replaceToken(v.Value, line, col, oldVal, newVal, style, comment) { return true }
+		}
+	case *ast.SequenceNode:
+		for _, v := range n.Values {
+			if replaceToken(v, line, col, oldVal, newVal, style, comment) { return true }
+		}
+	case *ast.MappingValueNode:
+		if replaceToken(n.Key, line, col, oldVal, newVal, style, comment) { return true }
+		if replaceToken(n.Value, line, col, oldVal, newVal, style, comment) { return true }
+	case *ast.DocumentNode:
+		if replaceToken(n.Body, line, col, oldVal, newVal, style, comment) { return true }
+	}
+	return false
+}
+
 func (y *Yaml) goYamlPathTarget(valueToWrite string, resultTarget *result.Target, dryRun bool) (notChanged int, ignoredFiles int, err error) {
-	var buf bytes.Buffer
-	e := yaml.NewEncoder(&buf)
-	defer e.Close()
-
-	e.SetIndent(2)
-
 	keys := y.spec.getKeys()
 
 	resultTargetFilesMap := map[string]bool{}
 
 	for filePath := range y.files {
-		buf = bytes.Buffer{}
 		originFilePath := y.files[filePath].originalFilePath
 		fileNotChanged := 0
 		fileKeysProcessed := 0
@@ -50,6 +118,12 @@ func (y *Yaml) goYamlPathTarget(valueToWrite string, resultTarget *result.Target
 		if len(docs) == 0 {
 			ignoredFiles++
 			continue
+		}
+
+		// Also parse with goccy/go-yaml to preserve formatting
+		goccyFile, err := parser.ParseBytes([]byte(y.files[filePath].content), parser.ParseComments)
+		if err != nil {
+			return 0, ignoredFiles, fmt.Errorf("parsing yaml file with goccy %q: %w", originFilePath, err)
 		}
 
 		// Process each key for this file
@@ -105,6 +179,14 @@ func (y *Yaml) goYamlPathTarget(valueToWrite string, resultTarget *result.Target
 					node.Value = valueToWrite
 					if y.spec.Comment != "" {
 						node.LineComment = y.spec.Comment
+						// Set comment in goccy tree? Wait, there is already setNodeComment, but we only have string nodes here and the comment belongs to the node.
+					}
+
+					// Update goccy AST
+					if index < len(goccyFile.Docs) {
+						if !replaceToken(goccyFile.Docs[index], node.Line, node.Column, oldVersion, valueToWrite, node.Style, y.spec.Comment) {
+							logrus.Debugf("could not find token to replace in goccy AST for line %d col %d", node.Line, node.Column)
+						}
 					}
 
 					if _, ok := resultTargetFilesMap[filePath]; !ok {
@@ -163,16 +245,8 @@ func (y *Yaml) goYamlPathTarget(valueToWrite string, resultTarget *result.Target
 			notChanged++
 		}
 
-		// Re-encode all documents back into buffer
-		buf = bytes.Buffer{}
-		for _, doc := range docs {
-			if err := e.Encode(doc); err != nil {
-				return 0, ignoredFiles, fmt.Errorf("unable to marshal the yaml file: %w", err)
-			}
-		}
-
 		f := y.files[filePath]
-		f.content = buf.String()
+		f.content = goccyFile.String()
 		// preserve leading document marker if it was present originally
 		if strings.HasPrefix(y.files[filePath].content, "---\n") && !strings.HasPrefix(f.content, "---\n") {
 			f.content = "---\n" + f.content
