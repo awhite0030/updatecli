@@ -202,7 +202,9 @@ func (t *TerraformLock) getProviderHashes(version string) ([]string, error) {
 
 		resp, err := t.httpClient.Get(url)
 		if err == nil {
-			defer resp.Body.Close()
+			defer func() {
+				_ = resp.Body.Close()
+			}()
 			if resp.StatusCode == http.StatusOK {
 				var data providerDownloadResponse
 				err = json.NewDecoder(resp.Body).Decode(&data)
