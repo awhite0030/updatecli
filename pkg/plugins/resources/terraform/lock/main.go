@@ -2,7 +2,10 @@ package lock
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"sort"
 	"strings"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -11,6 +14,7 @@ import (
 	terraformRegistryAddress "github.com/hashicorp/terraform-registry-address"
 	"github.com/minamijoyo/tfupdate/lock"
 	"github.com/sirupsen/logrus"
+	"github.com/updatecli/updatecli/pkg/core/httpclient"
 	"github.com/updatecli/updatecli/pkg/core/result"
 	"github.com/updatecli/updatecli/pkg/core/text"
 	terraformUtils "github.com/updatecli/updatecli/pkg/plugins/resources/terraform"
@@ -24,6 +28,7 @@ type TerraformLock struct {
 	files            map[string]file // map of file paths to file contents
 	lockIndex        lock.Index      // index is a cached index for updating dependency lock files.
 	provider         terraformRegistryAddress.Provider
+	httpClient       httpclient.HTTPClient
 }
 
 type file struct {
@@ -83,6 +88,8 @@ func New(spec interface{}) (*TerraformLock, error) {
 	}
 
 	newResource.lockIndex = lock.NewIndex(client)
+
+	newResource.httpClient = httpclient.NewPlainClient()
 
 	return newResource, nil
 }
@@ -180,7 +187,44 @@ func (t *TerraformLock) Changelog(from, to string) *result.Changelogs {
 	return nil
 }
 
+type providerDownloadResponse struct {
+	Packages map[string]struct {
+		Hashes []string `json:"hashes"`
+	} `json:"packages"`
+}
+
 func (t *TerraformLock) getProviderHashes(version string) ([]string, error) {
+	// OpenTofu registry optimization: OpenTofu registry returns all hashes directly.
+	// Try fetching the metadata directly to avoid downloading every platform separately
+	if strings.HasSuffix(string(t.provider.Hostname), "opentofu.org") {
+		// Try fetching metadata for a known platform just to get the "packages" map
+		url := fmt.Sprintf("https://%s/v1/providers/%s/%s/%s/download/linux/amd64", t.provider.Hostname, t.provider.Namespace, t.provider.Type, version)
+
+		resp, err := t.httpClient.Get(url)
+		if err == nil {
+			defer resp.Body.Close()
+			if resp.StatusCode == http.StatusOK {
+				var data providerDownloadResponse
+				err = json.NewDecoder(resp.Body).Decode(&data)
+				if err == nil && len(data.Packages) > 0 {
+					hashSet := make(map[string]struct{})
+					for _, pkg := range data.Packages {
+						for _, h := range pkg.Hashes {
+							hashSet[h] = struct{}{}
+						}
+					}
+					var hashes []string
+					for h := range hashSet {
+						hashes = append(hashes, h)
+					}
+					sort.Strings(hashes)
+					return hashes, nil
+				}
+			}
+		}
+	}
+
+	// Fallback for Terraform registry or if OpenTofu direct fetch failed
 	pv, err := t.lockIndex.GetOrCreateProviderVersion(context.Background(), t.provider.ForDisplay(), version, t.spec.Platforms)
 	if err != nil {
 		return nil, fmt.Errorf("%s failed to query provider locks for provider: %q, version: %q, platforms: %q: %s",
