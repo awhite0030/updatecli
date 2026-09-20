@@ -1,6 +1,7 @@
 package jsonschema
 
 import (
+	"os"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -80,6 +81,7 @@ func TestGenerateSchema(t *testing.T) {
     "type": "object"
 }`
 	s := New("", "")
+	s.SchemaDir = os.TempDir() + "/schema"
 
 	err := CloneCommentDirectory()
 	require.NoError(t, err)
