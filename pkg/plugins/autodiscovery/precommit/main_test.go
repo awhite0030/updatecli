@@ -40,7 +40,6 @@ targets:
     spec:
       file: '.pre-commit-config.yaml'
       key: "$.repos[?(@.repo == 'https://github.com/psf/black')].rev"
-      engine: 'yamlpath'
 `},
 		},
 		{
@@ -73,7 +72,6 @@ targets:
     spec:
       file: '.pre-commit-config.yaml'
       key: "$.repos[?(@.repo == 'https://github.com/pre-commit/pre-commit-hooks')].rev"
-      engine: 'yamlpath'
 `},
 		},
 		{
@@ -99,7 +97,6 @@ targets:
     spec:
       file: '.pre-commit-config.yaml'
       key: "$.repos[?(@.repo == 'https://github.com/asottile/add-trailing-comma')].rev"
-      engine: 'yamlpath'
 `},
 			ignoreRules: MatchingRules{
 				MatchingRule{
@@ -172,7 +169,6 @@ targets:
     spec:
       file: '.pre-commit-config.yaml'
       key: "$.repos[?(@.repo == 'https://github.com/psf/black')].rev"
-      engine: 'yamlpath'
 `},
 		},
 		{
@@ -198,7 +194,6 @@ targets:
     spec:
       file: '.pre-commit-config.yaml'
       key: "$.repos[?(@.repo == 'https://github.com/golangci/golangci-lint')].rev"
-      engine: 'yamlpath'
 `},
 		},
 	}
