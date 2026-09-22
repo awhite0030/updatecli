@@ -80,7 +80,9 @@ func updatecliRuntimeFuncMap(data interface{}) template.FuncMap {
 				return getFieldValueByQuery(data, []string{"Sources", s, "Output"})
 			case result.FAILURE:
 				return "", fmt.Errorf("parent source %q failed", s)
-			// If the result of the parent source execution is not SUCCESS or FAILURE, then it means it was either skipped or not already run.
+			case result.SKIPPED:
+				return "", nil
+			// If the result of the parent source execution is not SUCCESS, FAILURE or SKIPPED, then it means it was not already run.
 			// In this case, the function is return "as it" (literally) to allow retry later (on a second configuration iteration)
 			default:
 				return fmt.Sprintf("{{ source %q }}", s), nil
