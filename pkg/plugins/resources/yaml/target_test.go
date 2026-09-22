@@ -967,3 +967,40 @@ github:
 		})
 	}
 }
+func TestTargetMangle(t *testing.T) {
+	spec := Spec{
+		File: "test.yaml",
+		Key:  "$.annotations.'io.kubewarden.policy.version'",
+	}
+	y := Yaml{
+		spec: spec,
+		files: map[string]file{
+			"test.yaml": {
+				filePath: "test.yaml",
+				content: `rules:
+  - resources:
+      - elements: "some-element"
+annotations:
+  io.kubewarden.policy.version: "old"
+`,
+			},
+		},
+	}
+
+	resultTarget := &result.Target{}
+
+	notChanged, ignored, err := y.goYamlTarget("new", resultTarget, true)
+
+	require.NoError(t, err)
+	assert.Equal(t, 0, notChanged)
+	assert.Equal(t, 0, ignored)
+
+	expected := `rules:
+  - resources:
+      - elements: "some-element"
+annotations:
+  io.kubewarden.policy.version: new
+`
+
+	assert.Equal(t, expected, y.files["test.yaml"].content)
+}
