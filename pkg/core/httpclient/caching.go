@@ -35,6 +35,9 @@ func newCachingTransport(transport http.RoundTripper) *cachingTransport {
 
 func (c *cachingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if req.Method != http.MethodGet {
+		c.mu.Lock()
+		clear(c.entries)
+		c.mu.Unlock()
 		return c.transport.RoundTrip(req)
 	}
 
