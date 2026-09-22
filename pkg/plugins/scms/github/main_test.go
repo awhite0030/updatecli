@@ -17,6 +17,7 @@ func boolPointer(b bool) *bool {
 }
 
 func TestNew(t *testing.T) {
+	tempDir := t.TempDir()
 	tests := []struct {
 		name       string
 		spec       Spec
@@ -31,7 +32,7 @@ func TestNew(t *testing.T) {
 				Branch:     "main",
 				Repository: "updatecli",
 				Owner:      "updatecli",
-				Directory:  "/home/updatecli",
+				Directory:  tempDir,
 				Username:   "joe",
 				Token:      "superSecretTOkenOfJoe",
 				URL:        "github.com",
@@ -43,7 +44,7 @@ func TestNew(t *testing.T) {
 					Owner:      "updatecli",
 					Email:      "updatecli-bot@updatecli.io",
 					User:       "updatecli-bot",
-					Directory:  "/home/updatecli",
+					Directory:  tempDir,
 					Username:   "joe",
 					Token:      "superSecretTOkenOfJoe",
 					URL:        "github.com",
@@ -84,7 +85,7 @@ func TestNew(t *testing.T) {
 				Owner:      "updatecli",
 				Username:   "joe",
 				Token:      "superSecretTOkenOfJoe",
-				Directory:  "/home/updatecli",
+				Directory:  tempDir,
 			},
 			want: Github{
 				Spec: Spec{
@@ -93,7 +94,7 @@ func TestNew(t *testing.T) {
 					Owner:      "updatecli",
 					Username:   "joe",
 					Token:      "superSecretTOkenOfJoe",
-					Directory:  "/home/updatecli",
+					Directory:  tempDir,
 					Email:      "updatecli-bot@updatecli.io",
 					User:       "updatecli-bot",
 				},
@@ -108,7 +109,7 @@ func TestNew(t *testing.T) {
 				Owner:      "updatecli",
 				Username:   "joe",
 				Token:      "superSecretTOkenOfJoe",
-				Directory:  "/home/updatecli",
+				Directory:  tempDir,
 			},
 			want: Github{
 				Spec: Spec{
@@ -118,7 +119,7 @@ func TestNew(t *testing.T) {
 					Username:   "joe",
 					Token:      "superSecretTOkenOfJoe",
 					URL:        "",
-					Directory:  "/home/updatecli",
+					Directory:  tempDir,
 					Email:      "updatecli-bot@updatecli.io",
 					User:       "updatecli-bot",
 				},
@@ -133,7 +134,7 @@ func TestNew(t *testing.T) {
 				Owner:      "updatecli",
 				Username:   "joe",
 				Token:      "superSecretTOkenOfJoe",
-				Directory:  "/home/updatecli",
+				Directory:  tempDir,
 				URL:        "github.project.com",
 			},
 			want: Github{
@@ -144,7 +145,7 @@ func TestNew(t *testing.T) {
 					Username:   "joe",
 					Token:      "superSecretTOkenOfJoe",
 					URL:        "github.project.com",
-					Directory:  "/home/updatecli",
+					Directory:  tempDir,
 					Email:      "updatecli-bot@updatecli.io",
 					User:       "updatecli-bot",
 				},
@@ -159,7 +160,7 @@ func TestNew(t *testing.T) {
 				Owner:      "updatecli",
 				Username:   "joe",
 				Token:      "superSecretTOkenOfJoe",
-				Directory:  "/home/updatecli",
+				Directory:  tempDir,
 				URL:        "http://github.project.com",
 			},
 			want: Github{
@@ -170,7 +171,7 @@ func TestNew(t *testing.T) {
 					Username:   "joe",
 					Token:      "superSecretTOkenOfJoe",
 					URL:        "http://github.project.com",
-					Directory:  "/home/updatecli",
+					Directory:  tempDir,
 					Email:      "updatecli-bot@updatecli.io",
 					User:       "updatecli-bot",
 				},
@@ -185,7 +186,7 @@ func TestNew(t *testing.T) {
 				Owner:      "updatecli",
 				Username:   "joe",
 				Token:      "superSecretTOkenOfJoe",
-				Directory:  "/home/updatecli",
+				Directory:  tempDir,
 				URL:        "https://github.project.com",
 			},
 			want: Github{
@@ -196,7 +197,7 @@ func TestNew(t *testing.T) {
 					Username:   "joe",
 					Token:      "superSecretTOkenOfJoe",
 					URL:        "https://github.project.com",
-					Directory:  "/home/updatecli",
+					Directory:  tempDir,
 					Email:      "updatecli-bot@updatecli.io",
 					User:       "updatecli-bot",
 				},
@@ -210,7 +211,7 @@ func TestNew(t *testing.T) {
 				Repository: "updatecli",
 				Owner:      "updatecli",
 				Token:      "superSecretTOkenOfJoe",
-				Directory:  "/home/updatecli",
+				Directory:  tempDir,
 				URL:        "github.com",
 			},
 			want: Github{
@@ -220,7 +221,7 @@ func TestNew(t *testing.T) {
 					Owner:      "updatecli",
 					Token:      "superSecretTOkenOfJoe",
 					URL:        "github.com",
-					Directory:  "/home/updatecli",
+					Directory:  tempDir,
 					Email:      "updatecli-bot@updatecli.io",
 					User:       "updatecli-bot",
 				},

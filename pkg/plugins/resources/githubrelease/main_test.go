@@ -12,6 +12,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	tempDir := t.TempDir()
 	tests := []struct {
 		name    string
 		spec    Spec
@@ -83,7 +84,7 @@ func TestNew(t *testing.T) {
 						Branch:     "main",
 						Repository: "updatecli",
 						Owner:      "updatecli",
-						Directory:  "/home/updatecli",
+						Directory:  tempDir,
 						Username:   "joe",
 						Token:      "superSecretTOkenOfJoe",
 					},
