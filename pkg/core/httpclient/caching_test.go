@@ -265,3 +265,30 @@ func TestCachingTransport_ConcurrentAccess(t *testing.T) {
 	assert.LessOrEqual(t, serverHits, int64(goroutines))
 	assert.Equal(t, 1, ct.Len())
 }
+
+func TestCachingTransport_NonGetInvalidatesCache(t *testing.T) {
+	// Arrange
+	srv, _ := newCountingServer(t, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok"))
+	})
+
+	ct := newCachingTransport(http.DefaultTransport)
+	client := &http.Client{Transport: ct}
+
+	// 1. Populate cache with a GET
+	resp1, err := client.Get(srv.URL + "/data")
+	require.NoError(t, err)
+	io.ReadAll(resp1.Body)
+	resp1.Body.Close()
+
+	assert.Equal(t, 1, ct.Len(), "cache should have 1 entry")
+
+	// 2. Perform a non-GET (e.g. POST)
+	resp2, err := client.Post(srv.URL+"/submit", "application/json", nil)
+	require.NoError(t, err)
+	resp2.Body.Close()
+
+	// 3. Verify cache is invalidated
+	assert.Equal(t, 0, ct.Len(), "cache should be empty after a non-GET request")
+}
