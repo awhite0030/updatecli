@@ -10,6 +10,10 @@ import (
 )
 
 func TestNew(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip("skipping test in short mode due to external network dependency")
+	}
 	testData := []struct {
 		name                       string
 		spec                       Spec

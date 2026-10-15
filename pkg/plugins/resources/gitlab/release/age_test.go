@@ -47,6 +47,10 @@ func newReleaseResource(t *testing.T, url string, releaseAge age.Spec) *Gitlab {
 }
 
 func TestSearchReleasesAge(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip("skipping test in short mode due to external network dependency")
+	}
 	// GitLab returns the most recent release first and SearchReleases reverses that,
 	// so the expected values below read oldest first.
 	releases := []string{
@@ -116,6 +120,10 @@ func TestSearchReleasesAge(t *testing.T) {
 }
 
 func TestReleaseDate(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip("skipping test in short mode due to external network dependency")
+	}
 	released := time.Now().Add(-24 * time.Hour)
 	created := time.Now().Add(-48 * time.Hour)
 

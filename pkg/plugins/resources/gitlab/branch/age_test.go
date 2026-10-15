@@ -46,6 +46,10 @@ func newBranchResource(t *testing.T, url string, branchAge age.Spec) *Gitlab {
 }
 
 func TestSearchBranchesAge(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip("skipping test in short mode due to external network dependency")
+	}
 	branches := []string{
 		branchJSON("v1.0", daysAgo(30)),
 		branchJSON("v2.0", daysAgo(10)),
@@ -99,6 +103,10 @@ func TestSearchBranchesAge(t *testing.T) {
 }
 
 func TestBranchDate(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip("skipping test in short mode due to external network dependency")
+	}
 	committed := time.Now().Add(-24 * time.Hour)
 	authored := time.Now().Add(-48 * time.Hour)
 
