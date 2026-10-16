@@ -2,7 +2,6 @@ package udash
 
 import (
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -59,7 +58,7 @@ func TestUpdateConfigFileRoundTrip(t *testing.T) {
 }
 
 func TestWriteConfigFileIsNotWorldReadable(t *testing.T) {
-	dir := useTempConfigDir(t)
+	_ = useTempConfigDir(t)
 
 	require.NoError(t, updateConfigFile(authData{
 		URL:   "https://app.updatecli.io",
@@ -67,7 +66,10 @@ func TestWriteConfigFileIsNotWorldReadable(t *testing.T) {
 		Token: "udash_pat_secret",
 	}))
 
-	info, err := os.Stat(filepath.Join(dir, "updatecli", "udash.json"))
+	configFile, err := initConfigFile()
+	require.NoError(t, err)
+
+	info, err := os.Stat(configFile)
 	require.NoError(t, err)
 
 	// The file holds a long lived API token.
