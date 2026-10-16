@@ -10,7 +10,7 @@ import (
 
 // useTempConfigDir points os.UserConfigDir at a temporary directory so tests never
 // touch the developer's real Updatecli configuration.
-func useTempConfigDir(t *testing.T) string {
+func useTempConfigDir(t *testing.T) {
 	t.Helper()
 
 	dir := t.TempDir()
@@ -23,8 +23,6 @@ func useTempConfigDir(t *testing.T) string {
 	previous := APIURLSelector
 	APIURLSelector = ""
 	t.Cleanup(func() { APIURLSelector = previous })
-
-	return dir
 }
 
 func TestUpdateConfigFileRoundTrip(t *testing.T) {
@@ -58,7 +56,7 @@ func TestUpdateConfigFileRoundTrip(t *testing.T) {
 }
 
 func TestWriteConfigFileIsNotWorldReadable(t *testing.T) {
-	_ = useTempConfigDir(t)
+	useTempConfigDir(t)
 
 	require.NoError(t, updateConfigFile(authData{
 		URL:   "https://app.updatecli.io",
