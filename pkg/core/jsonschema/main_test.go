@@ -79,7 +79,7 @@ func TestGenerateSchema(t *testing.T) {
     "additionalProperties": false,
     "type": "object"
 }`
-	s := New("", "")
+	s := New("", t.TempDir()+"/schema")
 
 	err := CloneCommentDirectory()
 	require.NoError(t, err)

@@ -9,6 +9,9 @@ import (
 
 func TestNew(t *testing.T) {
 	t.Run("uses defaults and sanitizes values", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("skipping network-dependent test in short mode")
+		}
 		search, err := New(map[string]interface{}{
 			"organization": " updatecli ",
 			"project":      " updatecli-.* ",
@@ -24,6 +27,9 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, "https://dev.azure.com", search.spec.URL)
 	})
 	t.Run("uses minimal values", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("skipping network-dependent test in short mode")
+		}
 		search, err := New(map[string]interface{}{
 			"organization": " updatecli ",
 		})
