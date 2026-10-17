@@ -47,6 +47,5 @@ targets:
     spec:
       file: '{{ .File }}'
       key: "{{ .TargetKey }}"
-      engine: '{{ .TargetEngine }}'
 `
 )

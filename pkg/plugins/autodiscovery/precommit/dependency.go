@@ -10,7 +10,6 @@ import (
 	"text/template"
 
 	"github.com/sirupsen/logrus"
-	"github.com/updatecli/updatecli/pkg/plugins/resources/yaml"
 )
 
 var commentVersionRegex = regexp.MustCompile(`^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$`)
@@ -120,7 +119,6 @@ func (p Precommit) discoverDependencyManifests() ([][]byte, error) {
 				SourceVersionFilterRegex   string
 				TargetID                   string
 				TargetName                 string
-				TargetEngine               string
 				TargetKey                  string
 				File                       string
 				ScmID                      string
@@ -139,7 +137,6 @@ func (p Precommit) discoverDependencyManifests() ([][]byte, error) {
 				TargetID:                   ".pre-commit-config.yaml",
 				TargetName:                 fmt.Sprintf("deps(precommit): bump %q repo version to {{ source %q }}", repo.Repo, targetSource),
 				TargetKey:                  fmt.Sprintf("$.repos[?(@.repo == '%s')].rev", repo.Repo),
-				TargetEngine:               yaml.EngineYamlPath,
 				File:                       relativeFoundFile,
 				ScmID:                      p.scmID,
 				Digest:                     p.digest,
