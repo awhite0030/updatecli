@@ -2,6 +2,7 @@ package version
 
 import (
 	"fmt"
+	"runtime"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -16,18 +17,16 @@ var (
 	// BuildTime contains application build time
 	BuildTime string
 
-	// GoVersion contains the golang version uses to build this binary
-	GoVersion string
-
 	// DisableDevWarning is used to identify if we already notify that we use a dev version
 	isDevWarningDisabled bool
 )
 
 // Show displays various version information
 func Show() {
+	goVer := strings.TrimPrefix(runtime.Version(), "go")
 	logrus.Infof("")
 	logrus.Infof("Application:\t%s", Version)
-	logrus.Infof("%s", strings.ReplaceAll(GoVersion, "go version go", "Golang     :\t"))
+	logrus.Infof("Golang     :\t%s %s/%s", goVer, runtime.GOOS, runtime.GOARCH)
 	logrus.Infof("Build Time :\t%s", BuildTime)
 	logrus.Infof("")
 }
