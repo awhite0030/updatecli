@@ -119,6 +119,9 @@ func TestSanitizeBranchName(t *testing.T) {
 // Test that we can correctly retrieve a list of tags from a remote git repository
 // and that it's correctly ordered, starting with the oldest tag
 func TestTagsIntegration(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
 	g := GoGit{}
 	workingDir := filepath.Join(os.TempDir(), "tests", "updatecli")
 	withSubmodules := true
@@ -145,6 +148,9 @@ func TestTagsIntegration(t *testing.T) {
 // Test that we can correctly retrieve a list of tag refs from a remote git repository
 // and that it's correctly ordered, starting with the oldest tag
 func TestTagRefsIntegration(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
 	g := GoGit{}
 	workingDir := filepath.Join(os.TempDir(), "tests", "updatecli")
 	withSubmodules := true
