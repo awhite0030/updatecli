@@ -9,6 +9,9 @@ import (
 // Test that we can correctly retrieve a list of tags from a remote git repository
 // and that it's correctly ordered, starting with the oldest tag
 func TestBranchIntegration(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
 	g := GoGit{}
 	workingDir := filepath.Join(os.TempDir(), "tests", "updatecli")
 	withSubmodules := true
