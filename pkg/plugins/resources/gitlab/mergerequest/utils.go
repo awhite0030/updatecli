@@ -59,6 +59,49 @@ func (g *Gitlab) findExistingMR() (mr *gitlabapi.BasicMergeRequest, err error) {
 		}
 	}
 
+	page = 1
+	for {
+		optsList := gitlabapi.ListProjectMergeRequestsOptions{
+			SourceBranch: &g.SourceBranch,
+			TargetBranch: &g.TargetBranch,
+			State:        gitlabapi.Ptr("closed"),
+			OrderBy:      gitlabapi.Ptr("updated_at"),
+			Sort:         gitlabapi.Ptr("desc"),
+			ListOptions: gitlabapi.ListOptions{
+				Page:    page,
+				PerPage: perPage,
+			},
+		}
+
+		mergeRequests, resp, err := g.client.MergeRequests.ListProjectMergeRequests(
+			g.getPID(),
+			&optsList,
+			gitlabapi.WithContext(ctx),
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf("list mrs failed with error %w", err)
+		}
+
+		page = resp.NextPage
+
+		for _, mr := range mergeRequests {
+			if mr.SourceBranch == g.SourceBranch &&
+				mr.TargetBranch == g.TargetBranch &&
+				mr.State == "closed" {
+
+				logrus.Infof("%s GitLab merge request detected at:\n\t%s",
+					result.SUCCESS,
+					mr.WebURL)
+
+				return mr, nil
+			}
+		}
+		if page == 0 {
+			break
+		}
+	}
+
 	return nil, nil
 }
 

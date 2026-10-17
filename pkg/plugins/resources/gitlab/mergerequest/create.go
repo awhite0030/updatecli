@@ -71,6 +71,10 @@ func (g *Gitlab) CreateAction(ctx context.Context, report *reports.Action, reset
 			AllowCollaboration: g.spec.AllowCollaboration,
 		}
 
+		if existingMR.State == "closed" {
+			opts.StateEvent = gitlab.Ptr("reopen")
+		}
+
 		_, _, err := g.client.MergeRequests.UpdateMergeRequest(
 			g.getPID(),
 			existingMR.IID,
