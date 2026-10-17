@@ -124,7 +124,7 @@ func TestRunSources(t *testing.T) {
 			},
 			// As expected, the source is skipped because the condition is not met
 			// so the pipeline result is considered as success
-			expectedPipelineResult: result.SUCCESS,
+			expectedPipelineResult: result.SKIPPED,
 		},
 		{
 			conf: config.Config{
@@ -216,7 +216,7 @@ func TestRunSources(t *testing.T) {
 				"success":    result.SKIPPED,
 				"successbis": result.SUCCESS,
 			},
-			expectedPipelineResult: result.SUCCESS,
+			expectedPipelineResult: result.SKIPPED,
 		},
 	}
 
