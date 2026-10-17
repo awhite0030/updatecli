@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	goyaml "github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/parser"
 	"github.com/updatecli/updatecli/pkg/core/pipeline/scm"
 	"github.com/updatecli/updatecli/pkg/plugins/utils/pathresolver"
@@ -70,6 +71,10 @@ func (y *Yaml) Condition(_ context.Context, source string, scm scm.ScmHandler, p
 					if index != *y.spec.DocumentIndex {
 						continue
 					}
+				}
+
+				if _, isDirective := doc.Body.(*ast.DirectiveNode); isDirective {
+					continue
 				}
 
 				node, err := urlPath.FilterNode(doc.Body)
