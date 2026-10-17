@@ -37,16 +37,16 @@ func (x *XML) Condition(_ context.Context, source string, scm scm.ScmHandler, pa
 		return false, "", err
 	}
 
-	elem := doc.FindElement(x.spec.Path)
+	queryResult, found := queryElement(doc, x.spec.Path)
 
-	if elem == nil {
+	if !found {
 		return false, fmt.Sprintf("nothing found in path %q from file %q",
 			x.spec.Path,
 			resourceFile,
 		), nil
 	}
 
-	if value == elem.Text() {
+	if value == queryResult {
 		return true, fmt.Sprintf("Path %q, from file %q, is correctly set to %s",
 			x.spec.Path,
 			resourceFile,
@@ -56,7 +56,7 @@ func (x *XML) Condition(_ context.Context, source string, scm scm.ScmHandler, pa
 	return false, fmt.Sprintf("Path %q, from file %q, is incorrectly set to %q and should be %q",
 		x.spec.Path,
 		resourceFile,
-		elem.Text(),
+		queryResult,
 		value,
 	), nil
 }
