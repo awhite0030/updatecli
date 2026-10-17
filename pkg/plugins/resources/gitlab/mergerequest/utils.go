@@ -92,47 +92,38 @@ func (g *Gitlab) isRemoteBranchesExist() (bool, error) {
 		repository = g.spec.Repository
 	}
 
-	// Timeout api query after 30sec
-	ctx := context.Background()
-
 	foundRemoteSourceBranch := false
 	foundRemoteTargetBranch := false
-	var page int64
-	const perPage = 30
-	for {
+
+	checkBranch := func(branchName string) (bool, error) {
+		ctx := context.Background()
 		ctx, cancel := context.WithTimeout(ctx, gitlabRequestTimeout)
 		defer cancel()
-		remoteBranches, resp, err := g.client.Branches.ListBranches(
+
+		_, resp, err := g.client.Branches.GetBranch(
 			g.getPID(),
-			&gitlabapi.ListBranchesOptions{
-				ListOptions: gitlabapi.ListOptions{
-					Page:    page,
-					PerPage: perPage,
-				},
-			},
+			branchName,
 			gitlabapi.WithContext(ctx),
 		)
 
 		if err != nil {
-			return false, fmt.Errorf("list branches failed with status code: %w", err)
+			if resp != nil && resp.StatusCode == 404 {
+				return false, nil
+			}
+			return false, err
 		}
+		return true, nil
+	}
 
-		for _, remoteBranch := range remoteBranches {
-			if remoteBranch.Name == sourceBranch {
-				foundRemoteSourceBranch = true
-			}
-			if remoteBranch.Name == targetBranch {
-				foundRemoteTargetBranch = true
-			}
+	var err error
+	foundRemoteSourceBranch, err = checkBranch(sourceBranch)
+	if err != nil {
+		return false, fmt.Errorf("getting branch %q failed: %w", sourceBranch, err)
+	}
 
-			if foundRemoteSourceBranch && foundRemoteTargetBranch {
-				return true, nil
-			}
-		}
-		if page >= resp.TotalPages {
-			break
-		}
-		page++
+	foundRemoteTargetBranch, err = checkBranch(targetBranch)
+	if err != nil {
+		return false, fmt.Errorf("getting branch %q failed: %w", targetBranch, err)
 	}
 
 	if !foundRemoteSourceBranch {
@@ -149,7 +140,7 @@ func (g *Gitlab) isRemoteBranchesExist() (bool, error) {
 			repository)
 	}
 
-	return false, nil
+	return foundRemoteSourceBranch && foundRemoteTargetBranch, nil
 }
 
 // inheritFromScm retrieve missing GitLab settings from the GitLab scm object.
