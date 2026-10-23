@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"os"
+
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -79,7 +81,7 @@ func TestGenerateSchema(t *testing.T) {
     "additionalProperties": false,
     "type": "object"
 }`
-	s := New("", "")
+	s := New("", os.TempDir()+"/schema")
 
 	err := CloneCommentDirectory()
 	require.NoError(t, err)
