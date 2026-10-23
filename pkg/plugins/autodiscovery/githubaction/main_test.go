@@ -187,7 +187,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   tag:
     dependson:
@@ -201,7 +201,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   branch:
     dependson:
@@ -215,7 +215,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 `},
 		},
 		{
@@ -361,7 +361,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
       comment: '{{ source "release" }}'
 
   tag:
@@ -376,7 +376,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
       comment: '{{ source "tag" }}'
 
   branch:
@@ -391,7 +391,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
       comment: '{{ source "branch" }}'
 `, `name: 'deps: bump actions/checkout GitHub workflow'
 
@@ -526,7 +526,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[1].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
       comment: '{{ source "release" }}'
 
   tag:
@@ -541,7 +541,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[1].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
       comment: '{{ source "tag" }}'
 
   branch:
@@ -556,7 +556,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[1].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
       comment: '{{ source "branch" }}'
 `, `name: 'deps: bump actions/checkout GitHub workflow'
 
@@ -686,7 +686,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[2].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
       comment: '{{ source "release" }}'
 
   tag:
@@ -701,7 +701,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[2].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
       comment: '{{ source "tag" }}'
 
   branch:
@@ -716,7 +716,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[2].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
       comment: '{{ source "branch" }}'
 `},
 		},
@@ -820,7 +820,7 @@ targets:
     spec:
       file: '.gitea/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   tag:
     dependson:
@@ -834,7 +834,7 @@ targets:
     spec:
       file: '.gitea/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   branch:
     dependson:
@@ -848,7 +848,7 @@ targets:
     spec:
       file: '.gitea/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 `},
 		},
 		{
@@ -950,7 +950,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   tag:
     dependson:
@@ -964,7 +964,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   branch:
     dependson:
@@ -978,7 +978,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 `, `name: 'deps: bump tibdex/github-app-token GitHub workflow'
 
 sources:
@@ -1069,7 +1069,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[1].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   tag:
     dependson:
@@ -1083,7 +1083,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[1].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   branch:
     dependson:
@@ -1097,7 +1097,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[1].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 `, `name: 'deps: bump actions/checkout GitHub workflow'
 
 sources:
@@ -1188,7 +1188,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[2].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   tag:
     dependson:
@@ -1202,7 +1202,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[2].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   branch:
     dependson:
@@ -1216,7 +1216,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[2].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 `, `name: 'deps: bump updatecli/updatecli-action GitHub workflow'
 
 sources:
@@ -1307,7 +1307,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[3].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   tag:
     dependson:
@@ -1321,7 +1321,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[3].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   branch:
     dependson:
@@ -1335,7 +1335,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.updatecli.steps[3].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 `},
 		},
 		{
@@ -1437,7 +1437,7 @@ targets:
     spec:
       file: '.github/actions/checkout/action.yml'
       key: '$.runs.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   tag:
     dependson:
@@ -1451,7 +1451,7 @@ targets:
     spec:
       file: '.github/actions/checkout/action.yml'
       key: '$.runs.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   branch:
     dependson:
@@ -1465,7 +1465,7 @@ targets:
     spec:
       file: '.github/actions/checkout/action.yml'
       key: '$.runs.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 `, `name: 'deps: bump actions/checkout GitHub workflow'
 
 sources:
@@ -1556,7 +1556,7 @@ targets:
     spec:
       file: '.github/actions/setup/action.yaml'
       key: '$.runs.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   tag:
     dependson:
@@ -1570,7 +1570,7 @@ targets:
     spec:
       file: '.github/actions/setup/action.yaml'
       key: '$.runs.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   branch:
     dependson:
@@ -1584,7 +1584,7 @@ targets:
     spec:
       file: '.github/actions/setup/action.yaml'
       key: '$.runs.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 `},
 		},
 		{
@@ -1694,7 +1694,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.build.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   tag:
     dependson:
@@ -1708,7 +1708,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.build.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   branch:
     dependson:
@@ -1722,7 +1722,7 @@ targets:
     spec:
       file: '.github/workflows/updatecli.yaml'
       key: '$.jobs.build.steps[0].uses'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 `},
 		},
 	}
