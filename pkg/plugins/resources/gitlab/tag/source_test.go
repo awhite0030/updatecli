@@ -13,6 +13,10 @@ import (
 
 func TestSource(t *testing.T) {
 
+	if testing.Short() {
+		t.Skip("skipping test in short mode due to external network dependency")
+	}
+
 	tests := []struct {
 		name     string
 		manifest struct {

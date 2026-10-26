@@ -40,6 +40,8 @@ type mockConfig struct {
 }
 
 func TestGenerateSchema(t *testing.T) {
+	defaultSchemaDir = t.TempDir() + "/schema"
+
 	expectedJsonSchema := `{
     "$schema": "http://json-schema.org/draft-04/schema",
     "$id": "https://www.updatecli.io/schema/mock-config",

@@ -46,6 +46,10 @@ func newTagResource(t *testing.T, url string, tagAge age.Spec) *Gitlab {
 }
 
 func TestSearchTagsAge(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip("skipping test in short mode due to external network dependency")
+	}
 	// The most recent tag comes first, as the GitLab API reports it.
 	tags := []string{
 		tagJSON("v3.0.0", daysAgo(1)),
@@ -100,6 +104,10 @@ func TestSearchTagsAge(t *testing.T) {
 }
 
 func TestTagDate(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip("skipping test in short mode due to external network dependency")
+	}
 	created := time.Now().Add(-24 * time.Hour)
 	committed := time.Now().Add(-48 * time.Hour)
 

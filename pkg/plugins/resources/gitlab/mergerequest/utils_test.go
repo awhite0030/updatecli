@@ -8,6 +8,10 @@ import (
 
 func TestIsRemoteBranchExist(t *testing.T) {
 
+	if testing.Short() {
+		t.Skip("skipping test in short mode due to external network dependency")
+	}
+
 	testdata := []struct {
 		name           string
 		spec           Spec
@@ -51,6 +55,10 @@ func TestIsRemoteBranchExist(t *testing.T) {
 	}
 }
 func TestFindExistingMR_Table(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip("skipping test in short mode due to external network dependency")
+	}
 	testdata := []struct {
 		name string
 		spec Spec
