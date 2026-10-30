@@ -5,7 +5,8 @@ import (
 	"io"
 	"slices"
 	"strings"
-	"sync"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/mitchellh/hashstructure"
 	"github.com/updatecli/updatecli/pkg/core/log"
@@ -18,9 +19,8 @@ import (
 func (e *Engine) InitSCM() (err error) {
 	hashes := []uint64{}
 
-	wg := sync.WaitGroup{}
-	channel := make(chan int, 20)
-	defer wg.Wait()
+	g := new(errgroup.Group)
+	g.SetLimit(20)
 
 	for i := range e.Pipelines {
 		pipeline := e.Pipelines[i]
@@ -29,24 +29,27 @@ func (e *Engine) InitSCM() (err error) {
 			s := pipeline.SCMs[j]
 
 			if s.Handler != nil {
-				err = Clone(&s.Handler, channel, &hashes, &wg)
+				err = Clone(&s.Handler, &hashes, g)
 				if err != nil {
 					return err
 				}
 			}
 		}
 	}
+
+	if err := g.Wait(); err != nil {
+		return err
+	}
 	log.Infof("\nSCM repository retrieved: %d", len(hashes))
 
-	return err
+	return nil
 }
 
 // Clone parses a scm configuration then clone the git repository if needed.
 func Clone(
 	s *scm.ScmHandler,
-	channel chan int,
 	hashes *[]uint64,
-	wg *sync.WaitGroup,
+	g *errgroup.Group,
 ) error {
 	scmhandler := *s
 
@@ -64,16 +67,14 @@ func Clone(
 
 	if !found {
 		*hashes = append(*hashes, hash)
-		wg.Add(1)
-		go func(s scm.ScmHandler) {
-			channel <- 1
-			defer wg.Done()
-			_, err := s.Clone()
+		g.Go(func() error {
+			_, err := scmhandler.Clone()
 			if err != nil {
 				log.Errorf("err - %s", err)
+				return err
 			}
-		}(scmhandler)
-		<-channel
+			return nil
+		})
 	}
 
 	return nil
