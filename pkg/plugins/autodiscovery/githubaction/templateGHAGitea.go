@@ -116,7 +116,7 @@ targets:
     spec:
       file: '{{ .File }}'
       key: '{{ .TargetKey }}'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   tag:
     dependson:
@@ -133,7 +133,7 @@ targets:
     spec:
       file: '{{ .File }}'
       key: '{{ .TargetKey }}'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 
   branch:
     dependson:
@@ -150,6 +150,6 @@ targets:
     spec:
       file: '{{ .File }}'
       key: '{{ .TargetKey }}'
-      engine: 'yamlpath'
+      engine: 'goyaml'
 `
 )
