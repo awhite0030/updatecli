@@ -3,6 +3,7 @@ package jsonschema
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -79,7 +80,8 @@ func TestGenerateSchema(t *testing.T) {
     "additionalProperties": false,
     "type": "object"
 }`
-	s := New("", "")
+	tmpDir := os.TempDir() + "/schema"
+	s := New("", tmpDir)
 
 	err := CloneCommentDirectory()
 	require.NoError(t, err)
